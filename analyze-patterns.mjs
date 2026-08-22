@@ -1251,20 +1251,8 @@ function analyze() {
   const overallAdvanceRate = submitted.length > 0
     ? Math.round((overallAdvanced / submitted.length) * 100) : 0;
 
-  // Vendor yield measures the COLD-PORTAL channel, so an application a human
-  // carried is not evidence about the ATS it happened to land on. An agency
-  // that emails a req and gets a reply is an agency win; crediting it to the
-  // portal because the link was a Greenhouse URL inflates that portal's rate
-  // and hides a 0%. Agency-carried rows are reported by buildViaChannelAnalysis
-  // below, which is where their yield belongs.
-  const isCarried = (e) => {
-    const v = String(e.via ?? '').trim();
-    return v !== '' && v !== '-' && v !== '—';
-  };
-  const coldSubmitted = submitted.filter(e => !isCarried(e));
-
   const vendorMap = new Map();
-  for (const e of coldSubmitted) {
+  for (const e of submitted) {
     const v = e.vendor || 'unknown';
     if (!vendorMap.has(v)) vendorMap.set(v, { total: 0, advanced: 0 });
     const entry = vendorMap.get(v);
@@ -1281,19 +1269,18 @@ function analyze() {
       total: data.total,
       advanced: data.advanced,
       advanceRate: data.total > 0 ? Math.round((data.advanced / data.total) * 100) : 0,
-      sharePct: coldSubmitted.length > 0 ? Math.round((data.total / coldSubmitted.length) * 100) : 0,
+      sharePct: submitted.length > 0 ? Math.round((data.total / submitted.length) * 100) : 0,
       sufficientSample: data.total >= MIN_VENDOR_N,
     }))
     .sort((a, b) => b.total - a.total);
 
-  const identifiedCount = coldSubmitted.length - (vendorMap.get('unknown')?.total || 0);
+  const identifiedCount = submitted.length - (vendorMap.get('unknown')?.total || 0);
   const vendorAnalysis = {
     scope: ['greenhouse', 'lever', 'ashby', 'workday', 'icims'],
     minSampleForClaim: MIN_VENDOR_N,
-    submitted: coldSubmitted.length,
-    agencyCarriedExcluded: submitted.length - coldSubmitted.length,
+    submitted: submitted.length,
     identified: identifiedCount,
-    coveragePct: coldSubmitted.length > 0 ? Math.round((identifiedCount / coldSubmitted.length) * 100) : 0,
+    coveragePct: submitted.length > 0 ? Math.round((identifiedCount / submitted.length) * 100) : 0,
     overallAdvanceRate,
     breakdown: vendorBreakdown,
     citation: 'Bommasani et al., Algorithmic Monocultures in Hiring, FAccT 2026 (arXiv:2605.27371)',
