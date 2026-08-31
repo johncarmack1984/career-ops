@@ -650,14 +650,6 @@ function compileContentKeywordList(value) {
   return normalizeKeywordList(value).map(compileContentKeyword);
 }
 
-// Normalize a keyword list (lowercase/trim/drop-empties) and compile each
-// survivor into a matcher, so a `word:`/`stem:` prefix is honoured and a bare
-// keyword keeps its substring behaviour. The `.length` checks downstream still
-// read as "did the user configure any keyword here".
-function compileContentKeywordList(value) {
-  return normalizeKeywordList(value).map(compileContentKeyword);
-}
-
 export function buildContentFilter(contentFilter) {
   if (!contentFilter) return () => true;
   const positive = compileContentKeywordList(contentFilter.positive);
